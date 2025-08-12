@@ -111,7 +111,7 @@ public static class Program
                             }
                             else if (!waitAdditional)
                             {
-                                s = s[0].FindElements(By.ClassName("btn_blue_steamui"));
+                                s = driver.FindElements(By.ClassName("btn_blue_steamui"));
                                 if (s.Count > 0)
                                 {
                                     s[0].Click();
@@ -149,14 +149,21 @@ public static class Program
                             changed = true;
                             waitSubscribe = false;
                             waitAdditional = false;
-                            Console.WriteLine($"Workshop items left: {loadUrls.Count - 1} ({(startCount - (loadUrls.Count - 1)) * 100d / startCount}% done)");
+                            Console.WriteLine($"Workshop items left: {loadUrls.Count - 1} ({(startCount - (loadUrls.Count - 1)) * 100d / startCount:0.00}% done)");
                             loadUrls.RemoveAt(0);
                         }
                     }
                     else
                     {
                         Console.WriteLine("Finished!");
-                        driver.Close();
+                        try
+                        {
+                            driver.Close();
+                        }
+                        catch
+                        {
+                            // ignore any errors closing the driver
+                        }
                         return;
                     }
                 }
