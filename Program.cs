@@ -64,11 +64,11 @@ public static class Program
                             break;
                         }
                         using var f = File.CreateText(args[1]);
-                        foreach (var path in Directory.EnumerateFiles($"{fd}/cache/workshop").Where(x => x.EndsWith(".gma")))
+                        foreach (var path in Directory.EnumerateFiles($"{fd}/cache/workshop").Where(x => x.EndsWith(".gma")).Select((x => x.Replace("\\", "/"))))
                         {
-                            Console.WriteLine(path);
+                            //Console.WriteLine(path);
                             var id = path[(path.LastIndexOf('/') + 1)..^4];
-                            Console.WriteLine(id);
+                            //Console.WriteLine(id);
                             f.WriteLine($"https://steamcommunity.com/sharedfiles/filedetails/?id={id}");
                         }
                     }
