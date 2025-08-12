@@ -18,7 +18,7 @@ public static class Program
     static void Main(string[] args)
     {
 
-        Console.WriteLine("Gmod Workshop Share v1.0 by ryi3r - 2025");
+        Console.WriteLine("Gmod Workshop Share v1.0.1 by ryi3r - 2025");
         var argTask = ArgumentTask.None;
         var filePath = string.Empty;
         var interactiveMode = false;
@@ -68,16 +68,20 @@ public static class Program
                 switch (Console.ReadLine()!)
                 {
                     case "load":
-                        valid = true;
-                        Console.WriteLine("Write the file path or drag the file into the window and press enter.");
-                        filePath = Console.ReadLine()!;
                         argTask = ArgumentTask.Load;
+                        while (!valid)
+                        {
+                            Console.WriteLine("Write the file path or drag the file into the window and press enter.");
+                            filePath = Console.ReadLine()!;
+                            if (File.Exists(filePath))
+                                valid = true;
+                        }
                         break;
                     case "save":
-                        valid = true;
                         Console.WriteLine("Write the file path or drag the file into the window and press enter.");
-                        filePath = Console.ReadLine()!;
                         argTask = ArgumentTask.Save;
+                        filePath = Console.ReadLine()!;
+                        valid = true;
                         break;
                 }
             }
@@ -136,8 +140,10 @@ public static class Program
                     var waitSubscribe = false;
                     var waitAdditional = false;
                     var startCount = loadUrls.Count;
-                    while (true)
+                    var running = true;
+                    while (running)
                     {
+                        Thread.Sleep(20);
                         if (loggedIn)
                         {
                             if (changed)
@@ -150,20 +156,18 @@ public static class Program
                                     else if (!waitSubscribe)
                                     {
                                         s = driver.FindElements(By.Id("SubscribeItemBtn"));
-                                        if (s.Count > 0)
-                                        {
-                                            s[0].Click();
-                                            waitSubscribe = true;
-                                        }
+                                        if (s.Count <= 0)
+                                            continue;
+                                        s[0].Click();
+                                        waitSubscribe = true;
                                     }
                                     else if (!waitAdditional)
                                     {
                                         s = driver.FindElements(By.ClassName("btn_blue_steamui"));
-                                        if (s.Count > 0)
-                                        {
-                                            s[0].Click();
-                                            waitAdditional = true;
-                                        }
+                                        if (s.Count <= 0)
+                                            continue;
+                                        s[0].Click();
+                                        waitAdditional = true;
                                     }
                                 }
                                 else if (driver.FindElements(By.ClassName("error_ctn")).Count > 0)
@@ -176,29 +180,28 @@ public static class Program
                             }
                             else if (loadUrls.Count > 0)
                             {
-                                if (driver.Url != loadUrls[0])
+                                if (driver.Url == loadUrls[0])
+                                    continue;
                                 {
+                                    var done = false;
+                                    while (!done)
                                     {
-                                        var done = false;
-                                        while (!done)
+                                        try
                                         {
-                                            try
-                                            {
-                                                driver.Url = loadUrls[0];
-                                                done = true;
-                                            }
-                                            catch
-                                            {
-                                                // tab may crash so we'll handle it here
-                                            }
+                                            driver.Url = loadUrls[0];
+                                            done = true;
+                                        }
+                                        catch
+                                        {
+                                            // tab may crash so we'll handle it here
                                         }
                                     }
-                                    changed = true;
-                                    waitSubscribe = false;
-                                    waitAdditional = false;
-                                    Console.WriteLine($"Workshop items left: {loadUrls.Count - 1} ({(startCount - (loadUrls.Count - 1)) * 100d / startCount:0.00}% done)");
-                                    loadUrls.RemoveAt(0);
                                 }
+                                changed = true;
+                                waitSubscribe = false;
+                                waitAdditional = false;
+                                Console.WriteLine($"Workshop items left: {loadUrls.Count - 1} ({(startCount - (loadUrls.Count - 1)) * 100d / startCount:0.00}% done)");
+                                loadUrls.RemoveAt(0);
                             }
                             else
                             {
@@ -211,17 +214,14 @@ public static class Program
                                 {
                                     // ignore any errors closing the driver
                                 }
-                                return;
+                                running = false;
                             }
                         }
-                        else
-                        {
-                            if (driver.FindElements(By.Id("account_pulldown")).Count > 0)
-                                loggedIn = true;
-                        }
-                        Thread.Sleep(5);
+                        else if (driver.FindElements(By.Id("account_pulldown")).Count > 0)
+                            loggedIn = true;
                     }
                 }
+                break;
             case ArgumentTask.Save:
                 {
                     var fd = string.Empty;
