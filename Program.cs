@@ -95,7 +95,7 @@ public static class Program
             case ArgumentTask.Load:
                 {
                     var loadUrls = new List<string>();
-                    /*var fd = string.Empty;
+                    var fd = string.Empty;
                     foreach (var lib in SteamLibrary.GetSteamLibraries())
                     {
                         var sa = lib.SteamAppsPath;
@@ -103,7 +103,7 @@ public static class Program
                             continue;
                         fd = $"{sa}/workshop/content/4000/";
                         break;
-                    }*/
+                    }
                     using var f = File.OpenText(filePath);
                     while (true)
                     {
@@ -119,8 +119,8 @@ public static class Program
                                 Console.WriteLine($"Found duplicate url: {match.Value}");
                                 Console.ResetColor();
                             }
-                            /*else if (Directory.Exists($"{fd}/{match.Value[(match.Value.LastIndexOf('=') + 1)..]}/"))
-                                Console.WriteLine($"Url already installed: {match.Value}");*/
+                            else if (Directory.Exists($"{fd}/{match.Value[(match.Value.LastIndexOf('=') + 1)..]}/"))
+                                Console.WriteLine($"Url already installed: {match.Value}");
                             else
                                 loadUrls.Add(match.Value);
                             match = match.NextMatch();
