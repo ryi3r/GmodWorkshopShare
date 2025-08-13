@@ -18,7 +18,7 @@ public static class Program
     static void Main(string[] args)
     {
 
-        Console.WriteLine("Gmod Workshop Share v1.0.1 by ryi3r - 2025");
+        Console.WriteLine("Gmod Workshop Share v1.0.2 by ryi3r - 2025");
         var argTask = ArgumentTask.None;
         var filePath = string.Empty;
         var interactiveMode = false;
@@ -95,7 +95,7 @@ public static class Program
             case ArgumentTask.Load:
                 {
                     var loadUrls = new List<string>();
-                    var fd = string.Empty;
+                    /*var fd = string.Empty;
                     foreach (var lib in SteamLibrary.GetSteamLibraries())
                     {
                         var sa = lib.SteamAppsPath;
@@ -103,7 +103,7 @@ public static class Program
                             continue;
                         fd = $"{sa}/workshop/content/4000/";
                         break;
-                    }
+                    }*/
                     using var f = File.OpenText(filePath);
                     while (true)
                     {
@@ -119,8 +119,8 @@ public static class Program
                                 Console.WriteLine($"Found duplicate url: {match.Value}");
                                 Console.ResetColor();
                             }
-                            else if (Directory.Exists($"{fd}/{match.Value[(match.Value.LastIndexOf('=') + 1)..]}/"))
-                                Console.WriteLine($"Url already installed: {match.Value}");
+                            /*else if (Directory.Exists($"{fd}/{match.Value[(match.Value.LastIndexOf('=') + 1)..]}/"))
+                                Console.WriteLine($"Url already installed: {match.Value}");*/
                             else
                                 loadUrls.Add(match.Value);
                             match = match.NextMatch();
@@ -139,6 +139,7 @@ public static class Program
                     var changed = false;
                     var waitSubscribe = false;
                     var waitAdditional = false;
+                    var waitContent = false;
                     var startCount = loadUrls.Count;
                     var running = true;
                     while (running)
@@ -177,6 +178,17 @@ public static class Program
                                     Console.ResetColor();
                                     changed = false;
                                 }
+                                else if (!waitContent)
+                                {
+                                    s = driver.FindElements(By.ClassName("contentcheck_btns_ctn"));
+                                    if (s.Count <= 0)
+                                        continue;
+                                    s = s[0].FindElements(By.TagName("button"));
+                                    if (s.Count <= 0)
+                                        continue;
+                                    s[0].Click();
+                                    waitContent = true;
+                                }
                             }
                             else if (loadUrls.Count > 0)
                             {
@@ -200,6 +212,7 @@ public static class Program
                                 changed = true;
                                 waitSubscribe = false;
                                 waitAdditional = false;
+                                waitContent = false;
                                 Console.WriteLine($"Workshop items left: {loadUrls.Count - 1} ({(startCount - (loadUrls.Count - 1)) * 100d / startCount:0.00}% done)");
                                 loadUrls.RemoveAt(0);
                             }
